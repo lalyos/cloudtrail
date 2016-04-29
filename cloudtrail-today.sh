@@ -19,7 +19,7 @@ download_cloudtrail_today() {
     local output=cloudtrail-${todayNice}.json
     debug "save cloudtrail logs into: $output"
 
-    if ![[ "$DRY_RUN" ]]
+    if ! [[ "$DRY_RUN" ]]; then
         aws s3 sync --region=eu-west-1 --exclude "*" --include "cloudtrail/AWSLogs/$AWS_ACCOUNT_ID/CloudTrail/eu-west-1/${today}/*.json.gz"  s3://sequenceiq-cloudtrail .
     else
         debug "skipping s3 bucket synch"
@@ -37,7 +37,7 @@ filter_by_user() {
      declare username=${1:? username required}
 
      local json=cloudtrail-$(date +%Y%m%d).json
-     cat $json | jq -s '.[]|select(.userIdentity.arn=="arn:aws:iam::$AWS_ACCOUNT_ID:user/'$username'")|[.eventSource, .eventName]' -c | sort -u
+     cat $json | jq -s '.[]|select(.userIdentity.arn=="arn:aws:iam::'$AWS_ACCOUNT_ID':user/'$username'")|[.eventSource, .eventName]' -c | sort -u
 }
 
 main() {
